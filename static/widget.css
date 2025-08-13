@@ -1,0 +1,54 @@
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; height: 100%; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial, Apple Color Emoji, Segoe UI Emoji; }
+#app { height: 100%; display: flex; flex-direction: column; background: #fff; }
+
+/* Standalone (opened directly, not embedded): show as a floating panel */
+.standalone #app {
+	position: fixed;
+	bottom: 20px;
+	right: 20px;
+	width: 360px;
+	height: 520px;
+	border-radius: 16px;
+	box-shadow: 0 8px 28px rgba(0,0,0,0.2);
+	overflow: hidden;
+}
+
+.sx-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; background: #0f62fe; color: #fff; }
+.sx-title { font-weight: 600; }
+.sx-close { background: transparent; border: 0; color: #fff; font-size: 22px; cursor: pointer; }
+
+.sx-messages { flex: 1; padding: 12px; overflow: auto; background: #f7f8fa; }
+.sx-msg { margin: 8px 0; padding: 10px 12px; border-radius: 10px; max-width: 85%; line-height: 1.35; }
+.sx-msg.user { background: #e5f1ff; margin-left: auto; }
+.sx-msg.bot { background: #fff; border: 1px solid #e8eef5; }
+.sx-msg .content { font-size: 14px; }
+.sx-msg .content pre { background: #0b1020; color: #e6eaf2; padding: 10px 12px; border-radius: 8px; overflow: auto; }
+.sx-msg .content code { background: #f1f4f8; padding: 2px 6px; border-radius: 4px; }
+.sx-msg .content h1, .sx-msg .content h2, .sx-msg .content h3 { margin: 12px 0 6px; }
+.sx-msg .content ul { padding-left: 18px; margin: 6px 0; }
+.sx-msg .content a { color: #0f62fe; }
+.sx-msg .role { display: none; }
+
+.sx-input { display: flex; gap: 8px; padding: 10px; border-top: 1px solid #e8eef5; background: #fff; }
+.sx-input input { flex: 1; padding: 10px 12px; border: 1px solid #cfd7e6; border-radius: 8px; outline: none; }
+.sx-input button { background: #0f62fe; color: #fff; border: 0; border-radius: 8px; padding: 10px 14px; cursor: pointer; }
+
+/* Standalone floating toggle button */
+.sx-standalone-toggle {
+	position: fixed;
+	bottom: 20px;
+	right: 20px;
+	width: 56px;
+	height: 56px;
+	border-radius: 50%;
+	background: #0f62fe;
+	box-shadow: 0 8px 28px rgba(0,0,0,0.2);
+	cursor: pointer;
+	z-index: 2147483647;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: #fff;
+	font-size: 24px;
+}

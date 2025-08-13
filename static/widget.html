@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>Superion Chatbot</title>
+	<link rel="stylesheet" href="/static/widget.css" />
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+	<div id="app">
+		<header class="sx-header">
+			<div class="sx-title">Corserva Assistant</div>
+			<button class="sx-close" aria-label="Close">×</button>
+		</header>
+		<main class="sx-messages" id="messages" aria-live="polite"></main>
+		<form id="chat-form" class="sx-input">
+			<input id="user-input" type="text" placeholder="Type your message..." autocomplete="off" required />
+			<button type="submit">Send</button>
+		</form>
+	</div>
+	<script src="/static/widget.js"></script>
+	<script>
+		// If opened directly (not embedded), show icon first and open on click
+		(function(){
+			var isEmbedded = window.parent !== window;
+			if (!isEmbedded) {
+				document.documentElement.classList.add('standalone');
+				var app = document.getElementById('app');
+				app.style.display = 'none';
+				var btn = document.createElement('div');
+				btn.className = 'sx-standalone-toggle';
+				btn.setAttribute('role', 'button');
+				btn.setAttribute('aria-label', 'Open chat');
+				btn.textContent = 'C';
+				btn.addEventListener('click', function(){
+					app.style.display = 'flex';
+					btn.style.display = 'none';
+				});
+				document.body.appendChild(btn);
+				// close signal from inside widget still works
+				window.addEventListener('message', function (event) {
+					if (event && event.data === 'superion:close') {
+						app.style.display = 'none';
+						btn.style.display = 'flex';
+					}
+				});
+			}
+		})();
+	</script>
+</body>
+</html>
