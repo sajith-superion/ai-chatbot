@@ -7,8 +7,10 @@
 function appendMessage(role, text, isMarkdown) {
     var div = document.createElement('div');
     div.className = 'sx-msg ' + (role === 'user' ? 'user' : 'bot');
+    
     var content = document.createElement('div');
     content.className = 'content';
+    
     if (isMarkdown) {
         try {
             var html = marked.parse(text || '');
@@ -19,24 +21,70 @@ function appendMessage(role, text, isMarkdown) {
     } else {
         content.textContent = text;
     }
+    
     div.appendChild(content);
+    
     messagesEl.appendChild(div);
     messagesEl.scrollTop = messagesEl.scrollHeight;
 }
 
+	function getPrevExchange() {
+		var nodes = messagesEl.querySelectorAll('.sx-msg');
+		var lastUser = null;
+		var lastBot = null;
+		for (var i = nodes.length - 1; i >= 0 && (lastUser === null || lastBot === null); i--) {
+			var n = nodes[i];
+			var text = (n.querySelector('.content')?.textContent || '').trim();
+			if (!lastBot && n.classList.contains('bot')) {
+				// Ignore temporary thinking placeholder
+				if (text && !/^\W*thinking\W*$/i.test(text) && text.toLowerCase().indexOf('thinking') === -1) {
+					lastBot = text;
+				}
+			}
+			if (!lastUser && n.classList.contains('user')) {
+				if (text) lastUser = text;
+			}
+		}
+		return { prev_user_query: lastUser || '', prev_assistant_answer: lastBot || '' };
+	}
+
 	async function askBackend(question) {
 		try {
+			const prev = getPrevExchange();
 			const res = await fetch('/ask', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ query: question })
+				body: JSON.stringify({ 
+					query: question,
+					prev_user_query: prev.prev_user_query,
+					prev_assistant_answer: prev.prev_assistant_answer
+				})
 			});
 			const data = await res.json();
-			if (data && data.answer) return data.answer;
-			if (data && data.error) return 'Error: ' + (data.detail || data.error);
-			return 'No response.';
+			
+			if (data && data.answer) {
+				return {
+					answer: data.answer,
+					confidence: data.confidence
+				};
+			}
+			
+			if (data && data.error) {
+				return {
+					answer: 'Error: ' + (data.detail || data.error),
+					confidence: 'error'
+				};
+			}
+			
+			return {
+				answer: 'No response received.',
+				confidence: 'error'
+			};
 		} catch (e) {
-			return 'Network error.';
+			return {
+				answer: 'Network error. Please check your connection.',
+				confidence: 'error'
+			};
 		}
 	}
 
@@ -44,12 +92,20 @@ function appendMessage(role, text, isMarkdown) {
 		e.preventDefault();
 		var q = (inputEl.value || '').trim();
 		if (!q) return;
-    appendMessage('user', q, false);
+		
+		// Add user message
+		appendMessage('user', q, false);
 		inputEl.value = '';
-    appendMessage('bot', 'Thinking...', false);
-		var tmp = messagesEl.lastChild;
-		var ans = await askBackend(q);
-    tmp.querySelector('.content').innerHTML = DOMPurify.sanitize(marked.parse(ans || ''));
+		
+		// Add thinking message
+		appendMessage('bot', '🤔 Thinking...', false);
+		var thinkingMsg = messagesEl.lastChild;
+		
+		// Get response from backend
+		var response = await askBackend(q);
+		
+		// Replace thinking message with actual response
+		thinkingMsg.querySelector('.content').innerHTML = DOMPurify.sanitize(marked.parse(response.answer || ''));
 	});
 
 closeBtn.addEventListener('click', function () {
@@ -71,5 +127,5 @@ closeBtn.addEventListener('click', function () {
     }
 });
 
-appendMessage('bot', 'Hey! Need any help?', true);
+appendMessage('bot', 'Hey! 👋 I\'m your AI business assistant.\nHow can I help you today?', true);
 })();
